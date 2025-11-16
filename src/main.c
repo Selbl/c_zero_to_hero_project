@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
       case 'a':
         addstring = optarg;
         break;
-		case 'l':
+	case 'l':
 			list = true;
 			break;
 		case '?':

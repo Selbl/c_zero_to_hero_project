@@ -14,14 +14,14 @@ int list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
     if (dbhdr == NULL || employees == NULL) {
         return STATUS_ERROR;
     }
-
+	int i = 0;
     unsigned short count = dbhdr->count;
 
-    for (unsigned short i = 0; i < count; i++) {
-        printf("Name: %s\n", employees[i].name);
-        printf("Address: %s\n", employees[i].address);
-        printf("Hours: %u\n", employees[i].hours);
-        printf("\n");
+    for (; i < count; i++) {
+		printf("Employee %d\n",i);
+        printf("\tName: %s\n", employees[i].name);
+        printf("\tAddress: %s\n", employees[i].address);
+        printf("\tHours: %u\n", employees[i].hours);
     }
 
     return STATUS_SUCCESS;
