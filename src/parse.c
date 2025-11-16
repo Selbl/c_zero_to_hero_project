@@ -29,39 +29,53 @@ int list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
 
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *addstring){
+    if (dbhdr == NULL || employees == NULL || addstring == NULL) {
+        return STATUS_ERROR;
+    }
 
-	if (NULL == dbhdr) return STATUS_ERROR;
-	if (NULL == employees) return STATUS_ERROR;
-	if (NULL == *employees) return STATUS_ERROR;
-	if (NULL == addstring) return STATUS_ERROR;
+    /* Parse "name,address,hours" from addstring (strtok modifies addstring in place) */
+    char *name = strtok(addstring, ",");
+    char *addr = name ? strtok(NULL, ",") : NULL;
+    char *hours_str = addr ? strtok(NULL, ",") : NULL;
 
-	char *name = strtok(addstring,",");
-	if (NULL == name) return STATUS_ERROR;
-	
-	char *addr = strtok(NULL, ",");
-	if (NULL == addr) return STATUS_ERROR;
+    if (name == NULL || addr == NULL || hours_str == NULL) {
+        return STATUS_ERROR;
+    }
 
-	char *hours = strtok(NULL,",");
-	if (NULL == hours) return STATUS_ERROR;
+    unsigned long hours_val = strtoul(hours_str, NULL, 10);
 
-	struct employee_t *e = *employees;
-	e = realloc(e, sizeof(struct employee_t)*dbhdr->count+1);
-	if(e == NULL){
-		return STATUS_ERROR;
-	}
+    /* Grow the employees array by one */
+    unsigned short old_count = dbhdr->count;
+    size_t new_count = (size_t)old_count + 1;
 
-	dbhdr->count++;
+    struct employee_t *new_employees;
+    if (*employees == NULL) {
+        /* first employee */
+        new_employees = malloc(new_count * sizeof(struct employee_t));
+    } else {
+        new_employees = realloc(*employees, new_count * sizeof(struct employee_t));
+    }
+    if (new_employees == NULL) {
+        return STATUS_ERROR;
+    }
+    *employees = new_employees;
 
-	// printf("%s %s %s\n", name,addr,hours);
+    struct employee_t *e = &(*employees)[old_count];
 
-	strncpy(e[dbhdr->count-1].name,name,sizeof((e[dbhdr->count-1].name)));
+    /* Copy fields with proper bounds checking */
+    strncpy(e->name, name, sizeof(e->name) - 1);
+    e->name[sizeof(e->name) - 1] = '\0';
 
-	strncpy(e[dbhdr->count-1].address,addr,sizeof((e[dbhdr->count-1].address)));
+    strncpy(e->address, addr, sizeof(e->address) - 1);
+    e->address[sizeof(e->address) - 1] = '\0';
 
-	e[dbhdr->count-1].hours = atoi(hours);
+    e->hours = (unsigned int)hours_val;
 
-	return STATUS_SUCCESS;
+    dbhdr->count = (unsigned short)new_count;
+
+    return STATUS_SUCCESS;
 }
+
 
 int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employeesOut) {
 	if (fd < 0) {
