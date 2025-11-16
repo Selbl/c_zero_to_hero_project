@@ -10,15 +10,23 @@
 #include "common.h"
 #include "parse.h"
 
-void list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
-	int i = 0;
-	for (; i < dbhdr->count; i++) {
-		printf("Employee %d\n", i);
-		printf("\tName: %s\n", employees[i].name);
-		printf("\tAddress: %s\n", employees[i].address);
-		printf("\tHours: %d\n", employees[i].hours);
-	}
+int list_employees(struct dbheader_t *dbhdr, struct employee_t *employees) {
+    if (dbhdr == NULL || employees == NULL) {
+        return STATUS_ERROR;
+    }
+
+    unsigned short count = dbhdr->count;
+
+    for (unsigned short i = 0; i < count; i++) {
+        printf("Name: %s\n", employees[i].name);
+        printf("Address: %s\n", employees[i].address);
+        printf("Hours: %u\n", employees[i].hours);
+        printf("\n");
+    }
+
+    return STATUS_SUCCESS;
 }
+
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t *employees, char *addstring) {
 	printf("%s\n", addstring);
@@ -140,23 +148,25 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
 	}
 
 	*headerOut = header;
+    return STATUS_SUCCESS;
 }
 
-int create_db_header(int fd, struct dbheader_t **headerOut) {
-	struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
-	if (header == (void*)-1) {
-		printf("Malloc failed to create db header\n");
-		return STATUS_ERROR;
-	}
+int create_db_header(struct dbheader_t **headerOut) {
+    struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
+    if (header == NULL) {
+        printf("Malloc failed to create db header\n");
+        return STATUS_ERROR;
+    }
 
-	header->version = 0x1;
-	header->count = 0;
-	header->magic = HEADER_MAGIC;
-	header->filesize = sizeof(struct dbheader_t);
+    header->version = 0x1;
+    header->count = 0;
+    header->magic = HEADER_MAGIC;
+    header->filesize = sizeof(struct dbheader_t);
 
-	*headerOut = header;
+    *headerOut = header;
 
-	return STATUS_SUCCESS;
+    return STATUS_SUCCESS;
 }
+
 
 

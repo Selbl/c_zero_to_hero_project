@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 	unsigned short port = 0;
 	bool newfile = false;
 	bool list = false;
-  char *addstring = NULL;
+    char *addstring = NULL;
 	int c;
 
 	int dbfd = -1;
@@ -41,14 +41,14 @@ int main(int argc, char *argv[]) {
       case 'a':
         addstring = optarg;
         break;
-			case 'l':
-				list = true;
-				break;
-			case '?':
-				printf("Unknown option -%c\n", c);
-				break;
-			default:
-				return -1;
+		case 'l':
+			list = true;
+			break;
+		case '?':
+			printf("Unknown option -%c\n", c);
+			break;
+		default:
+			return -1;
 
 		}
 	}
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 			return -1;
 		}
 
-		if (create_db_header(dbfd, &dbhdr) == STATUS_ERROR) {
+		if (create_db_header(&dbhdr) == STATUS_ERROR) {
 			printf("Failed to create database header\n"); 
 			return -1;
 		}
