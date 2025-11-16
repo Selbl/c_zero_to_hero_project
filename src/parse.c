@@ -10,6 +10,72 @@
 #include "common.h"
 #include "parse.h"
 
+int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *addstring){
+
+	if (NULL == dbhdr) return STATUS_ERROR;
+	if (NULL == employees) return STATUS_ERROR;
+	if (NULL == *employees) return STATUS_ERROR;
+	if (NULL == addstring) return STATUS_ERROR;
+
+	char *name = strtok(addstring,",");
+	if (NULL == name) return STATUS_ERROR;
+	
+	char *addr = strtok(NULL, ",");
+	if (NULL == addr) return STATUS_ERROR;
+
+	char *hours = strtok(NULL,",");
+	if (NULL == hours) return STATUS_ERROR;
+
+	struct employee_t *e = *employees;
+	e = realloc(e, sizeof(struct employee_t)*dbhdr->count+1);
+	if(e == NULL){
+		return STATUS_ERROR;
+	}
+
+	dbhdr->count++;
+
+	// printf("%s %s %s\n", name,addr,hours);
+
+	strncpy(e[dbhdr->count-1].name,name,sizeof((e[dbhdr->count-1].name)));
+
+	strncpy(e[dbhdr->count-1].address,addr,sizeof((e[dbhdr->count-1].address)));
+
+	e[dbhdr->count-1].hours = atoi(hours);
+
+	return STATUS_SUCCESS;
+}
+
+
+int read_employees(int fd, struct dbheader_t *dbhdr, struct employee_t **employeesOut){
+	if (fd < 0) {
+		printf("Got a bad FD from the user\n");
+		return STATUS_ERROR;
+	}
+
+	int count = dbhdr->count;
+
+	// Create buffer of memory to read off disk
+	struct employee_t *employees = calloc(count, sizeof(struct employee_t));
+
+	if(employees == -1){
+		printf("Malloc failed\n");
+		return STATUS_ERROR;
+	}
+
+	// Read cursor
+	read(fd,employees,count*sizeof(struct employee_t));
+	int i = 0;
+
+	for(;i < count; i++){
+		employees[i].hours = ntohl(employees[i].hours);
+	}
+
+	*employeesOut = employees;
+
+	return STATUS_SUCCESS;
+}
+
+
 int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) {
 	if (fd < 0) {
 		printf("Got a bad FD from the user\n");
